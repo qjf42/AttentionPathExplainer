@@ -14,12 +14,12 @@
 
 ![attn](https://i.loli.net/2020/06/26/QEkBC6fHc2FAdNI.png)
 
-3. Then we use [`viterbi algorithm`](https://en.wikipedia.org/wiki/Viterbi_algorithm) to get <font color="red">top k paths</font> of total weights(products of edge weights on the path). The time complexity is $O(|Layer| \times |E|)$, and space complexity is $O(k |V|)$.
+3. Then we use [`viterbi algorithm`](https://en.wikipedia.org/wiki/Viterbi_algorithm) to get <font color="red">top k paths</font> of total weights(products of edge weights on the path). The time complexity is $O(|Layer| \times |E| \times k \log |V|)$, and space complexity is $O(k |V|)$.
 
 #### Further study
 1. Since [Transformer can be thought as a special case of GNN](https://graphdeeplearning.github.io/post/transformers-are-gnns/), so Transformer-based model (or any multi-layer attention model) such as BERT can also take advantage of it.
 2. Besides attention marchanism, other components like dense/conv/residual layers may also affect the information flow. As deep learning models are difficult to truly understand, *APE* is not guaranteed to make an reasonable explanation.
-3. Attention mechanism itself is also arguable. [Attention is not Explanation](https://arxiv.org/abs/1902.10186) and [Attention is not not Explanation](https://arxiv.org/abs/1908.04626) posed quite different arguments about the usefulness, and [Synthesizer](https://arxiv.org/abs/2005.00743) found that even random attention is not useless.
+3. Attention mechanism itself is also arguable. [Attention is not Explanation](https://arxiv.org/abs/1902.10186) and [Attention is not not Explanation](https://arxiv.org/abs/1908.04626) posed quite different arguments about the usefulness, and [Synthesizer](https://arxiv.org/abs/2005.00743) found that even fixed attention initialized at random is not useless.
 
 ### Usage
 1. Prerequisites
@@ -63,6 +63,6 @@
 
 ### TODO
 - [ ] Prettify graph visualization
-- [ ] Edge and path score renormalization in subgraph
+- [ ] Edge and path score renormalization
 - [ ] Transformer-based model
 - [ ] Node labels (currently only shows ids)
