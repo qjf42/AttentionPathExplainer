@@ -1,8 +1,8 @@
 ### What is it
-**`AttentionPathExplainer(APE)`** is a tool to help understand how GNN model make its prediction leveraging the attention mechanism. 
+**`AttentionPathExplainer(APE)`** is a tool to help understand how GNN/BERT model makes prediction leveraging the attention mechanism. 
 
 ### How it works
-[`MessagePassing`](https://pytorch-geometric.readthedocs.io/en/latest/notes/create_gnn.html) is a common GNN framework expressed as a neighborhood aggregation scheme (the information of each node is aggregated and updated by its neighbors of previous layer). Thus we consider model as a multi-layer structure whose all layer is of size $|V|$ (or a lattice of size $|V| \times (|Layer| + 1)$).
+[`MessagePassing`](https://pytorch-geometric.readthedocs.io/en/latest/notes/create_gnn.html) is a common GNN framework expressed as a neighborhood aggregation scheme (information of each node is aggregated and updated by its neighbors in previous layer). Thus we consider model as a multi-layer structure whose all layer is of size $|V|$ (or a lattice of size $|V| \times (|Layer| + 1)$).
 
 1. For instance, applying a 3-layer GNN model to a graph with 7 nodes (left), its message flow can be modelled as a lattice (right).
 
@@ -14,7 +14,7 @@
 
 ![attn](https://i.loli.net/2020/06/26/QEkBC6fHc2FAdNI.png)
 
-3. Then we use [`viterbi algorithm`](https://en.wikipedia.org/wiki/Viterbi_algorithm) to get <font color="red">top k paths</font> of total weights(products of edge weights on the path). The time complexity is $O(|Layer| \times |E| \times k \log |V|)$, and space complexity is $O(k |V|)$.
+3. Then we use [`viterbi algorithm`](https://en.wikipedia.org/wiki/Viterbi_algorithm) to get <font color="red">top k paths</font> of total weights(products of edge weights on the path). The time complexity is $O(|Layer| \times |E| \times k \log |V|)$, and space complexity is $O(k |Layer| |V|)$.
 
 #### Further study
 1. Since [Transformer can be thought as a special case of GNN](https://graphdeeplearning.github.io/post/transformers-are-gnns/), so Transformer-based model (or any multi-layer attention model) such as BERT can also take advantage of it.
@@ -23,7 +23,7 @@
 
 ### Usage
 1. Prerequisites
-    - Since *APE* is independent of model and learning framework, so only [NetworkX](https://networkx.github.io/documentation/stable/) is necessary to draw explanatory graphs.
+    - Since *APE* is <font color="red">**independent of model and learning framework**</font>, so only [NetworkX](https://networkx.github.io/documentation/stable/) is necessary to draw explanatory graphs.
 2. Prepare attention weights
    - Modify your model so that it returns **a list of AttentionTensors**
    - **AttentionTensors** is a tuple of (indices, attn_weights), indices is a **numpy array** with shape ($|E|$, 2), attn_weights ($|E|$,), representing aggregating flows of each layer
@@ -52,17 +52,26 @@
   
     ![link](https://i.loli.net/2020/06/26/Cp684jx1r9oPXvV.png)
 
-5. Transformer-based (TODO)
+5. BERT(Transformer-based)
     ``` python
-    ex = explainer.TransformerExplainer(512)
-    ex.explain(query, attention_tensors, topk=4, visualize=True)
+    tokens = ['[CLS]', 'Hello', 'world', '[SEP]']
+    logits, attentions = model(**inputs)
+    attentions = [_.squeeze().permute(1, 2, 0).numpy() for _ in attns] # [#tokens, #tokens, #heads]
+    ex = explainer.BERTExplainer('seq_cls')  # task type, seq_cls or token_cls
+    ex.explain(tokens, attentions, show_sep=False, topk=32, visualize=True)
     ```
 
+    - e.g
+        > it's just incredibly dull.
+
+    ![BERT](https://i.loli.net/2020/07/05/i7kQqlEfyOdICGK.png)
+
 ### Examples
-  - Notebooks in `examples` give simple experiments using [pytorch_geometric](https://github.com/rusty1s/pytorch_geometric) as GNN framework
+  - More test cases can be found in `examples`.
+    - `node_classification.ipynb` and `link_prediction.ipynb` do experiments using [pytorch_geometric](https://github.com/rusty1s/pytorch_geometric) as GNN framework.
+    - `BERT_sequence_classification.ipynb` gives some cases in sentiment analysis task using BERT.
 
 ### TODO
 - [ ] Prettify graph visualization
 - [ ] Edge and path score renormalization
-- [ ] Transformer-based model
 - [ ] Node labels (currently only shows ids)
